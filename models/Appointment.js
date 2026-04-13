@@ -3,11 +3,9 @@ const mongoose = require('mongoose');
 const appointmentSchema = new mongoose.Schema({
     patient: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Logged-in Patient User
+        ref: 'User', 
         required: true
     },
-    // Optional: Agar aapne Patient Registry (Story 7) use ki hai, 
-    // toh aap yahan direct Patient model ko bhi link kar sakte hain
     patientDetails: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Patient'
@@ -17,13 +15,15 @@ const appointmentSchema = new mongoose.Schema({
         ref: 'User', 
         required: true
     },
+    // FIXED: Date is no longer required at the time of booking
     date: {
         type: Date,
-        required: [true, "Appointment date is required"]
+        required: false 
     },
+    // FIXED: Time is no longer required at the time of booking
     time: {
         type: String,
-        required: [true, "Time slot is required"]
+        required: false
     },
     reason: {
         type: String,
@@ -35,7 +35,6 @@ const appointmentSchema = new mongoose.Schema({
         enum: ['Pending', 'Confirmed', 'Completed', 'Cancelled'],
         default: 'Pending'
     },
-    // User Story 6: Billing & Payment integration
     paymentStatus: {
         type: String,
         enum: ['Unpaid', 'Paid', 'Partially Paid'],
@@ -43,20 +42,18 @@ const appointmentSchema = new mongoose.Schema({
     },
     amount: {
         type: Number,
-        default: 500 // Default consultation fee
+        default: 500 
     },
-    // User Story 2: Link to Prescription after completion
     prescription: {
-        type: String, // Prescription text ya PDF link
+        type: String, 
         default: ""
     },
-    // Viva point: Token number hospital management ko professional banata hai
     tokenNumber: {
         type: Number
     }
 }, { timestamps: true });
 
-// Pre-save hook to generate a random token number if not provided
+// Pre-save hook to generate a random token number
 appointmentSchema.pre('save', function(next) {
     if (!this.tokenNumber) {
         this.tokenNumber = Math.floor(100 + Math.random() * 900);

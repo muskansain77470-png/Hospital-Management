@@ -1,41 +1,36 @@
 const express = require('express');
 const router = express.Router();
 const { 
-    getAppointments, 
-    createAppointment, 
+    getBookingPage, 
+    bookAppointment,
+    getAppointments,
     updateAppointment 
 } = require('../controllers/appointmentController');
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 
 // Sabhi routes protected hain
 router.use(protect);
 
-// --- VIEW ROUTES (Browser mein page dikhane ke liye) ---
+// --- VIEW ROUTES ---
 
 /**
  * @desc    Render the Appointment Booking Page
  * @route   GET /appointments/book
  */
-router.get('/book', (req, res) => {
-    // Ye check karein ki views/appointments/book.ejs file exist karti ho
-    res.render('appointments/book', { 
-        user: req.user,
-        title: 'Book New Appointment'
-    });
-});
+router.get('/book', getBookingPage);
 
-// --- API ROUTES (Data handle karne ke liye) ---
+// --- API ROUTES ---
 
 /**
- * @route   GET /appointments (Sare appointments dekhne ke liye)
- * @route   POST /appointments (Naya appointment save karne ke liye)
+ * @route   GET /appointments (List)
+ * @route   POST /appointments (Create)
  */
 router.route('/')
     .get(getAppointments)
-    .post(createAppointment);
+    .post(bookAppointment);
 
 /**
- * @route   PUT /appointments/:id (Appointment update karne ke liye)
+ * @route   PUT /appointments/:id
  */
 router.route('/:id')
     .put(updateAppointment);

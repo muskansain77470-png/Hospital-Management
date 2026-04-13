@@ -4,14 +4,17 @@ const Billing = require('../models/Billing');
 const Patient = require('../models/Patient');
 
 /**
- * @desc    User Story 9: Get all appointments for billing dashboard
+ * @desc    Get all appointments for billing dashboard
  * @route   GET /staff/billing
  */
 exports.getBillingDashboard = async (req, res) => {
     try {
-        // Fetch appointments that need billing
+        // Fetch appointments that are completed but not yet paid (or need billing)
         const appointments = await Appointment.find()
-            .populate('patient', 'name email phone')
+            .populate({
+                path: 'patient',
+                select: 'name email phone'
+            })
             .populate('doctor', 'name')
             .sort({ createdAt: -1 });
 
@@ -23,8 +26,8 @@ exports.getBillingDashboard = async (req, res) => {
 
         res.render('staff/billing', { 
             user: req.user, 
-            appointments,
-            recentBills,
+            appointments: appointments || [],
+            recentBills: recentBills || [],
             title: 'Billing Management'
         });
     } catch (error) {
@@ -34,43 +37,49 @@ exports.getBillingDashboard = async (req, res) => {
 };
 
 /**
- * @desc    User Story 9: Create a new bill with auto-calculations
- * @route   POST /api/staff/billing/create
+ * @desc    Create a new bill with auto-calculations
+ * @route   POST /staff/billing/create
  */
 exports.createBill = async (req, res) => {
     try {
         const { appointmentId, patientId, services, costs } = req.body;
 
-        // Basic Validation: Ensure services and costs are present
         if (!services || !costs || !appointmentId) {
-            return res.status(400).render('error', { message: "All billing fields are required." });
+            return res.status(400).render('error', { message: "At least one service and cost is required." });
         }
 
-        // Converting string inputs to arrays if they aren't already (safety check)
+        // Backend fix: Normalize single inputs into arrays
         const servicesArray = Array.isArray(services) ? services : [services];
         const costsArray = Array.isArray(costs) ? costs : [costs];
 
-        // Map items for the Billing Model
-        const items = servicesArray.map((name, index) => ({
-            serviceName: name,
-            cost: parseFloat(costsArray[index]) || 0
-        }));
+        let totalAmount = 0;
+        const items = servicesArray.map((name, index) => {
+            const cost = parseFloat(costsArray[index]) || 0;
+            totalAmount += cost; // Auto-calculate total
+            return {
+                serviceName: name,
+                cost: cost
+            };
+        });
 
-        // Create the bill (Model logic will handle tax/totals)
+        // Create the Bill
         const newBill = await Billing.create({
             appointment: appointmentId,
             patient: patientId,
             items,
+            totalAmount, // Ensure this field exists in your Billing Schema
             generatedBy: req.user._id,
-            status: 'Paid' 
+            status: 'Paid',
+            invoiceNumber: `INV-${Date.now().toString().slice(-6)}` // Generating a unique invoice number
         });
 
-        // User Story 6: Update appointment status
+        // Update Appointment Status to Paid
         await Appointment.findByIdAndUpdate(appointmentId, { 
             paymentStatus: 'Paid',
             status: 'Completed' 
         });
 
+        // Redirect back to billing dashboard with success
         res.redirect('/staff/billing');
     } catch (error) {
         console.error("Bill Creation Error:", error.message);
@@ -79,24 +88,28 @@ exports.createBill = async (req, res) => {
 };
 
 /**
- * @desc    User Story 7: Register New Patient
+ * @desc    Register New Patient (AJAX compatible)
  * @route   POST /api/staff/patients/register
  */
 exports.registerPatient = async (req, res) => {
     try {
         const { name, age, gender, phone, bloodGroup } = req.body;
 
-        // Check if patient already exists by phone
+        // Basic validation
+        if (!name || !phone) {
+            return res.status(400).json({ success: false, message: "Name and Phone are required." });
+        }
+
         const existingPatient = await Patient.findOne({ phone });
         if (existingPatient) {
-            return res.status(400).json({ success: false, message: "Patient already registered with this phone number" });
+            return res.status(400).json({ success: false, message: "Patient already registered with this phone number." });
         }
 
         const patient = await Patient.create({
-            name,
-            age,
-            gender,
-            phone,
+            name, 
+            age, 
+            gender, 
+            phone, 
             bloodGroup,
             createdBy: req.user._id
         });
@@ -108,6 +121,6 @@ exports.registerPatient = async (req, res) => {
         });
     } catch (error) {
         console.error("Patient Registration Error:", error.message);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
