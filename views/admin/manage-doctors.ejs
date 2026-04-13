@@ -1,0 +1,38 @@
+<div class="p-8 bg-white rounded-[2.5rem] shadow-xl border border-slate-100">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-black text-slate-800">Hospital Staff</h2>
+        <a href="/signup?role=doctor" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-sm">Add New Doctor</a>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50">
+                    <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase">Doctor Name</th>
+                    <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase">Email</th>
+                    <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                <% doctors.forEach(doc => { %>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-6 py-4 font-bold text-slate-800">Dr. <%= doc.name %></td>
+                        <td class="px-6 py-4 text-slate-500 font-semibold"><%= doc.email %></td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="removeUser('<%= doc._id %>')" class="text-red-500 font-bold text-xs hover:underline">Remove</button>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+async function removeUser(id) {
+    if(confirm('Are you sure you want to remove this staff member?')) {
+        const res = await fetch(`/api/admin/user/${id}`, { method: 'DELETE' });
+        if(res.ok) window.location.reload();
+    }
+}
+</script>

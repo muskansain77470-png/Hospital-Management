@@ -1,0 +1,46 @@
+<div class="p-8">
+    <div class="mb-8">
+        <h1 class="text-4xl font-black text-slate-800">Welcome, <%= user.name %>!</h1>
+        <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">Role: <%= user.role %></p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <% if (user.role === 'admin') { %>
+            <a href="/api/admin/doctors" class="p-6 bg-blue-600 text-white rounded-3xl shadow-xl hover:scale-105 transition-transform">
+                <h3 class="text-xl font-bold">Manage Staff</h3>
+                <p class="text-blue-100 text-sm">Add, remove, or update doctors.</p>
+            </a>
+            <a href="/api/admin/dashboard" class="p-6 bg-slate-800 text-white rounded-3xl shadow-xl hover:scale-105 transition-transform">
+                <h3 class="text-xl font-bold">Hospital Reports</h3>
+                <p class="text-slate-300 text-sm">Analyze system performance.</p>
+            </a>
+        <% } %>
+
+        <% if (user.role === 'doctor') { %>
+            <a href="/doctor/appointments" class="p-6 bg-emerald-600 text-white rounded-3xl shadow-xl hover:scale-105 transition-transform">
+                <h3 class="text-xl font-bold">My Schedule</h3>
+                <p class="text-emerald-100 text-sm">View patient appointments.</p>
+            </a>
+        <% } %>
+
+        <% if (user.role === 'patient') { %>
+            <a href="/api/patients/book" class="p-6 bg-indigo-600 text-white rounded-3xl shadow-xl hover:scale-105 transition-transform">
+                <h3 class="text-xl font-bold">Book Appointment</h3>
+                <p class="text-indigo-100 text-sm">Find a doctor and consult.</p>
+            </a>
+            <a href="/api/patients/history" class="p-6 bg-white border border-slate-200 rounded-3xl shadow-xl hover:scale-105 transition-transform">
+                <h3 class="text-xl font-bold text-slate-800">Medical History</h3>
+                <p class="text-slate-500 text-sm">View your past prescriptions.</p>
+            </a>
+        <% } %>
+
+        <% if (user.role === 'receptionist') { %>
+            <a href="/staff/billing" class="p-6 bg-amber-500 text-white rounded-3xl shadow-xl hover:scale-105 transition-transform">
+                <h3 class="text-xl font-bold">Billing & Invoices</h3>
+                <p class="text-amber-100 text-sm">Manage patient payments.</p>
+            </a>
+        <% } %>
+
+    </div>
+</div>

@@ -1,0 +1,181 @@
+<div class="space-y-8">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-blue-950 tracking-tight">Patient Registry</h1>
+            <p class="text-slate-500 font-medium">Manage and monitor hospital inpatient/outpatient records.</p>
+        </div>
+        <button onclick="openModal()" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Register New Patient
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Records</p>
+            <h3 id="total-patients" class="text-2xl font-black text-blue-950">0</h3>
+        </div>
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Recent Admissions</p>
+            <h3 class="text-2xl font-black text-blue-600">24h</h3>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Patient Name</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Age/Gender</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Contact</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Blood Group</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                        <th class="px-6 py-4 text-right"></th>
+                    </tr>
+                </thead>
+                <tbody id="patient-list" class="divide-y divide-slate-50">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="patientModal" class="fixed inset-0 z-[60] hidden bg-blue-950/20 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
+            <h2 class="text-xl font-black text-blue-950">Patient Registration</h2>
+            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <form id="patientForm" class="p-8 space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Full Name</label>
+                    <input type="text" name="name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-4 focus:ring-blue-500/5 outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Phone</label>
+                    <input type="text" name="phone" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-4 focus:ring-blue-500/5 outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Age</label>
+                    <input type="number" name="age" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-4 focus:ring-blue-500/5 outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Gender</label>
+                    <select name="gender" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="space-y-1 col-span-2">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Blood Group</label>
+                    <select name="bloodGroup" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none">
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" id="savePatientBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all mt-4">
+                Save Record
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Helper function for API calls with Authentication
+    async function apiFetch(endpoint, options = {}) {
+        const token = localStorage.getItem('token');
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        };
+        const response = await fetch(`/api${endpoint}`, { ...defaultOptions, ...options });
+        if (!response.ok) throw new Error('API Error');
+        return response.json();
+    }
+
+    // 1. Fetch and Load Patients
+    async function loadPatients() {
+        const list = document.getElementById('patient-list');
+        try {
+            const patients = await apiFetch('/patients');
+            document.getElementById('total-patients').textContent = patients.length;
+            
+            if (patients.length === 0) {
+                list.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-slate-400 font-medium">No records found.</td></tr>`;
+                return;
+            }
+
+            list.innerHTML = patients.map(p => `
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-6 py-4 font-bold text-blue-950">${p.name}</td>
+                    <td class="px-6 py-4 text-slate-500 text-sm">${p.age}y / ${p.gender}</td>
+                    <td class="px-6 py-4 text-slate-500 text-sm">${p.phone}</td>
+                    <td class="px-6 py-4">
+                        <span class="bg-red-50 text-red-600 text-[10px] font-black px-2 py-1 rounded-md border border-red-100 uppercase">${p.bloodGroup || 'N/A'}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-1.5 text-green-600 font-bold text-[11px]">
+                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Outpatient
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button class="text-slate-300 hover:text-blue-600 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (err) {
+            list.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-red-400">Failed to load data. Please log in again.</td></tr>`;
+        }
+    }
+
+    // 2. Submit New Patient
+    document.getElementById('patientForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('savePatientBtn');
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+
+        try {
+            await apiFetch('/patients', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            closeModal();
+            loadPatients(); 
+            e.target.reset();
+        } catch (err) {
+            alert("Error saving patient record. Check server connection.");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Save Record";
+        }
+    });
+
+    function openModal() { document.getElementById('patientModal').classList.remove('hidden'); }
+    function closeModal() { document.getElementById('patientModal').classList.add('hidden'); }
+
+    window.onload = loadPatients;
+</script>

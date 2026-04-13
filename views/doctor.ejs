@@ -1,0 +1,106 @@
+<div class="min-h-screen bg-slate-50/50 p-4 lg:p-8">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div>
+            <h1 class="text-4xl font-black text-slate-800 tracking-tight mb-2">
+                Welcome back, <span class="text-blue-600">Doctor</span>
+            </h1>
+            <div class="flex items-center gap-2">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <p class="text-slate-500 font-bold text-sm">System is synced with the central medical database.</p>
+            </div>
+        </div>
+        <a href="/appointments" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-black text-sm shadow-xl shadow-blue-200 transition-all transform hover:-translate-y-1 text-center">
+            View Schedule
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+        
+        <a href="/patients" class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-lg hover:border-blue-200 transition-all transform hover:-translate-y-1 group">
+            <div class="flex items-center justify-between mb-6">
+                <div class="p-3 bg-blue-50 rounded-2xl group-hover:bg-blue-100">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <svg class="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+            </div>
+            <h3 class="text-4xl font-black text-slate-800 mb-1">
+                <%= stats.activePatients %>
+            </h3>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-blue-600">Active Patients</p>
+        </a>
+
+        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <div class="flex items-center justify-between mb-6">
+                <div class="p-3 bg-orange-50 rounded-2xl">
+                    <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <h3 class="text-4xl font-black text-slate-800 mb-1">
+                <%= stats.pending %>
+            </h3>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pending Today</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <div class="flex items-center justify-between mb-6">
+                <div class="p-3 bg-green-50 rounded-2xl">
+                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944"></path>
+                    </svg>
+                </div>
+            </div>
+            <h3 class="text-3xl font-black text-slate-800 mb-1 italic">Active</h3>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Security Status</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm">
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="font-black text-slate-800 text-lg">Recent Patients</h3>
+                <a href="/patients" class="text-blue-600 font-bold text-xs uppercase tracking-widest hover:underline">View All</a>
+            </div>
+            <div class="space-y-4">
+                <% if (recentAppointments && recentAppointments.length > 0) { %>
+                    <% recentAppointments.forEach(item => { %>
+                        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 font-bold">
+                                    <%= item.patient.name.charAt(0) %>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-800 text-sm"><%= item.patient.name %></p>
+                                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest"><%= item.status %></p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-black text-slate-400"><%= new Date(item.createdAt).toLocaleDateString() %></span>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p class="text-slate-400 text-sm font-bold uppercase">No recent activity</p>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-8">
+                    <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341"></path>
+                    </svg>
+                    <span class="bg-red-500 text-[10px] font-black px-2 py-1 rounded-lg uppercase">3 Urgent</span>
+                </div>
+                <h4 class="text-xl font-black mb-4 leading-tight">Critical updates in the surgery wing.</h4>
+                <p class="text-slate-400 text-sm font-semibold mb-6">Review latest lab results for newly admitted patients.</p>
+            </div>
+            <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl"></div>
+        </div>
+    </div>
+</div>
