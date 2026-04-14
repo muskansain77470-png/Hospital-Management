@@ -17,14 +17,16 @@
 
                 <div class="hidden md:flex items-center gap-1">
                     <a href="/dashboard" class="px-4 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">Dashboard</a>
-                    <a href="/patients" class="px-4 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">Patients</a>
-                    <a href="/appointments" class="px-4 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">Schedules</a>
-                    <a href="/inventory" class="px-4 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">Pharmacy</a>
+                    
+                    <% if (typeof user !== 'undefined' && user.role !== 'patient') { %>
+                        <a href="/doctor/patients" class="px-4 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">Patients</a>
+                        <a href="/doctor/schedules" class="px-4 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">Schedules</a>
+                        <a href="/doctor/pharmacy" class="px-4 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">Pharmacy</a>
+                    <% } %>
                 </div>
             </div>
 
             <div class="flex items-center gap-6">
-                
                 <div class="hidden lg:flex flex-col items-end border-r border-slate-200 pr-6">
                     <span id="header-time" class="text-sm font-black text-slate-800 tabular-nums tracking-tight">00:00:00</span>
                     <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Hospital Local Time</span>
@@ -72,7 +74,9 @@
     updateClock();
 
     function logout() {
+        // Clear tokens and redirect
         localStorage.removeItem('token');
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.href = '/login';
     }
 </script>

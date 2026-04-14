@@ -14,57 +14,67 @@ exports.getDoctorDashboard = async (req, res) => {
                 .limit(10)
         ]);
 
-        res.render('doctor', { 
+        res.render('doctor/dashboard', { 
             user: req.user,
             stats: {
                 activePatients: activePatients.length || 0,
                 pending: pendingCount || 0,
                 total: appointments.length || 0
             },
-            recentAppointments: appointments || []
+            recentAppointments: appointments || [],
+            title: 'Doctor Dashboard',
+            layout: false 
         });
     } catch (error) {
-        res.status(500).render('error', { message: error.message });
+        res.status(500).send("Dashboard Error: " + error.message);
     }
 };
 
-// 2. Confirm Appointment (POST)
-exports.confirmAppointment = async (req, res) => {
+// 2. Get All Patients
+exports.getPatientsList = async (req, res) => {
     try {
-        const { appointmentId, date, time } = req.body;
-        await Appointment.findByIdAndUpdate(appointmentId, {
-            date, time, status: 'Confirmed'
+        const appointments = await Appointment.find({ doctor: req.user._id })
+            .populate('patient', 'name email phone gender age');
+        
+        const uniquePatients = [];
+        const patientIds = new Set();
+        appointments.forEach(app => {
+            if (app.patient && !patientIds.has(app.patient._id.toString())) {
+                patientIds.add(app.patient._id.toString());
+                uniquePatients.push(app.patient);
+            }
         });
-        res.redirect('/doctor/dashboard');
+
+        res.render('patients/patient', { 
+            user: req.user, 
+            patients: uniquePatients,
+            title: 'My Patients',
+            layout: false
+        });
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(500).send(error.message);
     }
 };
 
-// 3. Update Status (PUT) - YE WALA MISSING THA
+// 3. Pharmacy Logic (Beautiful Page)
+exports.getPharmacy = (req, res) => {
+    res.render('doctor/pharmacy', { 
+        user: req.user, 
+        title: 'Pharmacy Management', 
+        layout: false 
+    });
+};
+
+// 4. Update Status (AJAX)
 exports.updateStatus = async (req, res) => {
     try {
-        const { status } = req.body;
+        const status = req.body.status || 'Completed';
         const appointment = await Appointment.findByIdAndUpdate(
-            req.params.id,
-            { status },
-            { new: true }
+            req.params.id, { status: status }, { new: true }
         );
         res.status(200).json({ success: true, data: appointment });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
-    }
-};
-
-// 4. View All Appointments
-exports.getDoctorAppointments = async (req, res) => {
-    try {
-        const appointments = await Appointment.find({ doctor: req.user._id })
-            .populate('patient', 'name email phone gender')
-            .sort({ createdAt: -1 });
-        res.render('doctor/appointments', { user: req.user, appointments });
-    } catch (error) {
-        res.status(500).render('error', { message: error.message });
     }
 };
 
@@ -82,7 +92,7 @@ exports.addPrescription = async (req, res) => {
             status: 'Completed', 
             prescription: prescription._id 
         });
-        res.status(201).json({ success: true, message: "Prescription added!" });
+        res.status(200).json({ success: true, message: "Prescription saved" });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }

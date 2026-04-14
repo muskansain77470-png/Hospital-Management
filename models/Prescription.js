@@ -8,36 +8,60 @@ const prescriptionSchema = new mongoose.Schema({
     },
     doctor: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'User', // Ensure your Doctor/User model is named 'User'
         required: true
     },
     patient: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // References the logged-in patient
+        ref: 'User',
         required: true
     },
-    // User Story 2: Medicines, dosage, and instructions
     diagnosis: {
         type: String,
         required: [true, "Diagnosis is required for the medical record"],
         trim: true
     },
+    // Updated medicines array to match your EJS frontend
     medicines: [{
-        name: { type: String, required: true },
-        dosage: { type: String, required: true }, // e.g., "500mg"
-        frequency: { type: String, required: true }, // e.g., "1-0-1" or "Twice a day"
-        duration: { type: String, required: true }  // e.g., "5 days"
+        name: { 
+            type: String, 
+            required: [true, "Medicine name is required"] 
+        },
+        dosage: { 
+            type: String, 
+            required: [true, "Dosage (e.g. 500mg) is required"] 
+        },
+        // Changed frequency to optional or removed 'required' to prevent save errors 
+        // until you add it to your HTML form.
+        frequency: { 
+            type: String, 
+            default: "As directed" 
+        },
+        duration: { 
+            type: String, 
+            required: [true, "Duration (e.g. 5 days) is required"] 
+        }
     }],
     instructions: {
-        type: String, // e.g., "Take after meals"
-        default: "Follow dosage as mentioned."
+        type: String,
+        default: "Take medicines after meals unless specified otherwise."
     },
     notes: {
         type: String,
         trim: true
+    },
+    status: {
+        type: String,
+        enum: ['Active', 'Completed'],
+        default: 'Active'
     }
 }, { 
-    timestamps: true // User Story 2: Accessible anytime with recorded date
+    timestamps: true 
 });
+
+// Indexing for faster lookups (Useful for patient history)
+prescriptionSchema.index({ appointment: 1 });
+prescriptionSchema.index({ patient: 1 });
+prescriptionSchema.index({ doctor: 1 });
 
 module.exports = mongoose.model('Prescription', prescriptionSchema);

@@ -2,43 +2,43 @@ const express = require('express');
 const router = express.Router();
 const Appointment = require('../models/Appointment');
 const { protect, authorize } = require('../middleware/authMiddleware');
-
-// Dashboard aur baaki controllers import karein
 const { 
     getDoctorDashboard, 
-    addPrescription 
+    addPrescription,
+    updateStatus,
+    getPatientsList,
+    getPharmacy
 } = require('../controllers/doctorController');
 
 router.use(protect);
 router.use(authorize('doctor'));
 
-// Dashboard route
+// Main Navigation Routes
 router.get('/dashboard', getDoctorDashboard);
+router.get('/patients', getPatientsList);
+router.get('/pharmacy', getPharmacy);
 
-/**
- * FIXED ROUTE: /doctor/prescription/:id
- * Agar aap browser mein ye URL hit kar rahe hain, toh ye route yahan hona chahiye
- */
+// Schedules (Reusing dashboard logic or separate view)
+router.get('/schedules', (req, res) => {
+    res.render('doctor/dashboard', { 
+        user: req.user, title: 'Schedules', layout: false,
+        stats: { activePatients: 0, pending: 0, total: 0 },
+        recentAppointments: []
+    });
+});
+
+// Prescription Logic
 router.get('/prescription/:id', async (req, res) => {
     try {
         const appointment = await Appointment.findById(req.params.id).populate('patient');
-        
-        if (!appointment) {
-            return res.status(404).render('error', { message: "Appointment not found" });
-        }
-
-        res.render('doctor/prescription', { 
-            user: req.user, 
-            appointment,
-            title: 'Write Prescription'
-        });
+        if (!appointment) return res.status(404).send("Not Found");
+        res.render('doctor/prescription', { user: req.user, appointment, title: 'Prescription', layout: false });
     } catch (err) {
-        console.error("Route Error:", err.message);
-        res.status(500).render('error', { message: "Internal Server Error" });
+        res.status(500).send("Server Error");
     }
 });
 
-// Prescription POST handle karne ke liye
 router.post('/prescription', addPrescription);
+router.post('/check-in/:id', updateStatus); 
 
 module.exports = router;

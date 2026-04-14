@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareSync | Doctor Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-slate-50">
+
+    <%- include('../partials/header') %>
+
+    <main class="p-10 max-w-7xl mx-auto">
+        <div class="bg-slate-900 rounded-[3rem] p-12 text-white mb-10 relative overflow-hidden shadow-2xl">
+            <div class="relative z-10">
+                <span class="bg-blue-500/20 text-blue-400 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Medical Professional Portal</span>
+                <h1 class="text-5xl font-black mt-4 mb-2 italic">Welcome back, Dr. <%= user.name %></h1>
+                <p class="text-slate-400 font-medium">Manage your daily schedule and patient records efficiently.</p>
+            </div>
+            <div class="absolute right-0 top-0 opacity-10 text-[15rem] font-black -mr-10 -mt-10">DR</div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Patients</p>
+                <h3 class="text-4xl font-black text-slate-900"><%= stats.activePatients %></h3>
+            </div>
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100">
+                <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">Today's Slots</p>
+                <h3 class="text-4xl font-black text-slate-900"><%= stats.total %></h3>
+            </div>
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100">
+                <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">Pending</p>
+                <h3 id="pending-count" class="text-4xl font-black text-slate-900"><%= stats.pending %></h3>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100 mb-20">
+            <h2 class="text-xl font-black uppercase italic mb-8">Upcoming Appointments</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b">
+                            <th class="pb-4 px-4">Patient Name</th>
+                            <th class="pb-4 px-4">Time Slot</th>
+                            <th class="pb-4 px-4">Status</th>
+                            <th class="pb-4 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm font-bold text-slate-600">
+                        <% if (recentAppointments && recentAppointments.length > 0) { %>
+                            <% recentAppointments.forEach(appt => { %>
+                                <tr id="appt-row-<%= appt._id %>" class="border-b hover:bg-slate-50 transition-colors">
+                                    <td class="py-6 px-4">
+                                        <%= appt.patient ? appt.patient.name : 'Walk-in Patient' %>
+                                        <div class="text-[10px] text-slate-400 font-normal"><%= appt.patient ? appt.patient.email : '' %></div>
+                                    </td>
+                                    <td class="py-6 px-4"><%= appt.time || 'TBD' %></td>
+                                    <td class="py-6 px-4">
+                                        <span id="status-<%= appt._id %>" 
+                                            class="<%= appt.status === 'Completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600' %> px-3 py-1 rounded-full text-[9px] uppercase font-black">
+                                            <%= appt.status %>
+                                        </span>
+                                    </td>
+                                    <td class="py-6 px-4 text-right">
+                                        <% if (appt.status !== 'Completed') { %>
+                                            <button 
+                                                onclick="handleCheckIn('<%= appt._id %>')" 
+                                                id="btn-<%= appt._id %>"
+                                                class="bg-blue-600 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+                                            >
+                                                Check-in
+                                            </button>
+                                        <% } else { %>
+                                            <a href="/doctor/prescription/<%= appt._id %>" class="text-blue-600 text-[10px] font-black uppercase hover:underline">Write Prescription</a>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="4" class="py-10 text-center text-slate-400 font-medium italic">No appointments for today.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <script>
+        async function handleCheckIn(appointmentId) {
+            const button = document.getElementById(`btn-${appointmentId}`);
+            const statusLabel = document.getElementById(`status-${appointmentId}`);
+            
+            button.innerText = "Processing...";
+            button.disabled = true;
+
+            try {
+                // FIXED URL: Removed /api and used /doctor prefix
+                const response = await fetch(`/doctor/check-in/${appointmentId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusLabel.innerText = "Completed";
+                    statusLabel.className = "bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-[9px] uppercase font-black";
+                    
+                    // Replace button with Prescription link
+                    button.parentElement.innerHTML = `<a href="/doctor/prescription/${appointmentId}" class="text-blue-600 text-[10px] font-black uppercase hover:underline">Write Prescription</a>`;
+                    
+                    // Update stats
+                    const pendingEl = document.getElementById('pending-count');
+                    if (pendingEl) pendingEl.innerText = Math.max(0, parseInt(pendingEl.innerText) - 1);
+                } else {
+                    alert("Error: " + data.message);
+                    button.innerText = "Check-in";
+                    button.disabled = false;
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Server down or Network error.");
+                button.innerText = "Check-in";
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

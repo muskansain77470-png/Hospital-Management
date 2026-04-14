@@ -1,52 +1,41 @@
 const express = require('express');
 const router = express.Router();
+
 // Controller functions import
+const patientController = require('../controllers/patientController');
+
+// Destructuring with fallback to prevent "Undefined" crash
 const { 
     getBookingPage, 
     bookAppointment, 
-    getMedicalHistory 
-} = require('../controllers/patientController');
+    getMedicalHistory,
+    getPatientDashboard 
+} = patientController;
+
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-/**
- * 🔐 MIDDLEWARE
- * Sabhi routes ke liye login (protect) hona zaroori hai.
- * Sirf 'patient' role hi in pages ko access kar sakta hai.
- */
+// 🔐 MIDDLEWARE - Only patients allowed
 router.use(protect);
 router.use(authorize('patient'));
 
-// --- USER STORY 4: BOOK APPOINTMENT ---
+// --- DASHBOARD ---
+// If getPatientDashboard is undefined, Express crashes. 
+// Ensure this name matches exactly in patientController.js
+router.get('/dashboard', getPatientDashboard);
 
-/**
- * @route   GET /patients/book
- * @desc    Renders the booking form with a list of available doctors
- */
+// --- BOOKING ---
 router.get('/book', getBookingPage);
-
-/**
- * @route   POST /patients/book
- * @desc    Handles the appointment booking submission
- */
 router.post('/book', bookAppointment);
 
-
-// --- USER STORY 5: VIEW MEDICAL RECORDS ---
-
-/**
- * @route   GET /patients/history
- * @desc    Renders the patient's past appointments and prescriptions
- */
+// --- HISTORY ---
 router.get('/history', getMedicalHistory);
 
-/**
- * @route   GET /patients/profile
- * @desc    Renders the patient's personal profile view
- */
+// --- PROFILE ---
 router.get('/profile', (req, res) => {
-    res.render('patients/patient', { 
+    res.render('patients/profile', { 
         user: req.user,
-        title: 'My Profile'
+        title: 'My Profile',
+        layout: 'layouts/layout' // Changed to use your standard layout
     });
 });
 

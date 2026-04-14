@@ -1,107 +1,178 @@
-<div class="min-h-screen bg-slate-50/50 p-4 lg:p-12">
-    <div class="max-w-4xl mx-auto">
-        
-        <div class="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm mb-8">
-            <div class="flex justify-between items-start mb-6">
-                <div>
-                    <h1 class="text-3xl font-black text-slate-900 tracking-tight">Write <span class="text-blue-600">Prescription</span></h1>
-                    <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-1">Medical Record #<%= appointment._id.toString().slice(-6).toUpperCase() %></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write Prescription | CareSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <%- include('../partials/header') %>
+
+    <div class="min-h-screen p-4 lg:p-12">
+        <div class="max-w-4xl mx-auto">
+            
+            <div class="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm mb-8">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Write <span class="text-blue-600">Prescription</span></h1>
+                        <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-1">
+                            Medical Record #<%= appointment._id.toString().slice(-6).toUpperCase() %>
+                        </p>
+                    </div>
+                    <a href="/doctor/dashboard" class="bg-slate-100 p-3 rounded-2xl text-slate-400 hover:text-red-500 transition-all">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </a>
                 </div>
-                <a href="/appointments" class="text-slate-400 hover:text-slate-600 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </a>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y border-slate-50">
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Patient</p>
+                        <p class="font-bold text-slate-800"><%= appointment.patient ? appointment.patient.name : 'Walk-in' %></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Gender/Age</p>
+                        <p class="font-bold text-slate-800"><%= appointment.patient ? appointment.patient.gender : 'N/A' %> / <%= appointment.patient ? appointment.patient.age : 'N/A' %></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Reason</p>
+                        <p class="font-bold text-blue-600"><%= appointment.reason || 'General Checkup' %></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Date</p>
+                        <p class="font-bold text-slate-800"><%= new Date().toLocaleDateString('en-IN') %></p>
+                    </div>
+                </div>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y border-slate-50">
-                <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Patient</p>
-                    <p class="font-bold text-slate-800"><%= appointment.patient.name %></p>
-                </div>
-                <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Gender/Age</p>
-                    <p class="font-bold text-slate-800"><%= appointment.patient.gender %> / <%= appointment.patient.age || 'N/A' %></p>
-                </div>
-                <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Reason</p>
-                    <p class="font-bold text-blue-600"><%= appointment.reason %></p>
-                </div>
-                <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Date</p>
-                    <p class="font-bold text-slate-800"><%= new Date().toLocaleDateString() %></p>
-                </div>
-            </div>
-        </div>
+            <form id="prescriptionForm" class="space-y-6">
+                <input type="hidden" name="appointmentId" value="<%= appointment._id %>">
+                <input type="hidden" name="patientId" value="<%= appointment.patient ? appointment.patient._id : '' %>">
 
-        <form action="/api/doctor/prescription" method="POST" class="space-y-6">
-            <input type="hidden" name="appointmentId" value="<%= appointment._id %>">
-            <input type="hidden" name="patientId" value="<%= appointment.patient._id %>">
-
-            <div class="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
-                <div class="mb-8">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-3 ml-2">Diagnosis / Clinical Notes</label>
-                    <textarea name="diagnosis" rows="2" class="w-full bg-slate-50 border-none rounded-2xl p-4 font-medium text-slate-700 focus:ring-2 focus:ring-blue-500" placeholder="Enter patient's condition..." required></textarea>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Medicines & Dosage</label>
-                        <button type="button" onclick="addMedicineRow()" class="text-blue-600 font-black text-[10px] uppercase tracking-widest hover:text-blue-700">+ Add Medicine</button>
+                <div class="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
+                    <div class="mb-8">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-3 ml-2">Diagnosis / Clinical Notes</label>
+                        <textarea name="diagnosis" id="diagnosis" rows="3" class="w-full bg-slate-50 border-none rounded-2xl p-5 font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Describe the patient's condition and diagnosis..." required></textarea>
                     </div>
 
-                    <div id="medicineList" class="space-y-3">
-                        <div class="grid grid-cols-12 gap-3 medicine-row">
-                            <div class="col-span-5">
-                                <input type="text" name="medicines[0][name]" placeholder="Medicine Name" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold" required>
-                            </div>
-                            <div class="col-span-3">
-                                <input type="text" name="medicines[0][dosage]" placeholder="Dosage (500mg)" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold" required>
-                            </div>
-                            <div class="col-span-3">
-                                <input type="text" name="medicines[0][duration]" placeholder="Duration (5 Days)" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold" required>
-                            </div>
-                            <div class="col-span-1 flex items-center justify-center">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Medicines & Dosage</label>
+                            <button type="button" onclick="addMedicineRow()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-100 transition-all border border-blue-100">+ Add Medicine</button>
+                        </div>
+
+                        <div id="medicineList" class="space-y-3">
+                            <div class="grid grid-cols-12 gap-3 medicine-row">
+                                <div class="col-span-5">
+                                    <input type="text" placeholder="Medicine Name" class="med-name w-full bg-slate-50 border-none rounded-xl p-4 text-sm font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" required>
                                 </div>
+                                <div class="col-span-3">
+                                    <input type="text" placeholder="Dosage (e.g. 500mg)" class="med-dosage w-full bg-slate-50 border-none rounded-xl p-4 text-sm font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" required>
+                                </div>
+                                <div class="col-span-3">
+                                    <input type="text" placeholder="Duration (e.g. 5 Days)" class="med-duration w-full bg-slate-50 border-none rounded-xl p-4 text-sm font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" required>
+                                </div>
+                                <div class="col-span-1"></div>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="mt-8">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-3 ml-2">Additional Instructions</label>
+                        <textarea name="instructions" id="instructions" rows="2" class="w-full bg-slate-50 border-none rounded-2xl p-5 font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="e.g. Take after meals, twice a day..."></textarea>
+                    </div>
                 </div>
 
-                <div class="mt-8">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-3 ml-2">Additional Instructions</label>
-                    <textarea name="instructions" rows="2" class="w-full bg-slate-50 border-none rounded-2xl p-4 font-medium text-slate-700 focus:ring-2 focus:ring-blue-500" placeholder="e.g. Take after meals, Drink plenty of water..."></textarea>
+                <div class="flex gap-4">
+                    <button type="submit" id="submitBtn" class="flex-1 bg-blue-600 text-white py-5 rounded-[2rem] font-black shadow-xl shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all uppercase tracking-widest text-xs">
+                        Save Prescription & Close Case
+                    </button>
                 </div>
-            </div>
-
-            <div class="flex gap-4">
-                <button type="submit" class="flex-1 bg-blue-600 text-white py-5 rounded-[2rem] font-black shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all uppercase tracking-widest text-xs">
-                    Save Prescription & Close Case
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
-<script>
-    let medicineCount = 1;
+    <script>
+        function addMedicineRow() {
+            const list = document.getElementById('medicineList');
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-12 gap-3 medicine-row mt-3 animate-in fade-in slide-in-from-top-2 duration-300';
+            row.innerHTML = `
+                <div class="col-span-5">
+                    <input type="text" placeholder="Medicine Name" class="med-name w-full bg-slate-50 border-none rounded-xl p-4 text-sm font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" required>
+                </div>
+                <div class="col-span-3">
+                    <input type="text" placeholder="Dosage" class="med-dosage w-full bg-slate-50 border-none rounded-xl p-4 text-sm font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" required>
+                </div>
+                <div class="col-span-3">
+                    <input type="text" placeholder="Duration" class="med-duration w-full bg-slate-50 border-none rounded-xl p-4 text-sm font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" required>
+                </div>
+                <div class="col-span-1 flex items-center justify-center">
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="bg-red-50 text-red-400 hover:bg-red-500 hover:text-white w-10 h-10 rounded-xl transition-all font-bold text-xl">×</button>
+                </div>
+            `;
+            list.appendChild(row);
+        }
 
-    function addMedicineRow() {
-        const list = document.getElementById('medicineList');
-        const row = document.createElement('div');
-        row.className = 'grid grid-cols-12 gap-3 medicine-row animate-in slide-in-from-top-2 duration-300';
-        row.innerHTML = `
-            <div class="col-span-5">
-                <input type="text" name="medicines[\${medicineCount}][name]" placeholder="Medicine Name" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold" required>
-            </div>
-            <div class="col-span-3">
-                <input type="text" name="medicines[\${medicineCount}][dosage]" placeholder="Dosage" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold" required>
-            </div>
-            <div class="col-span-3">
-                <input type="text" name="medicines[\${medicineCount}][duration]" placeholder="Duration" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold" required>
-            </div>
-            <div class="col-span-1 flex items-center justify-center">
-                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-600 font-bold">×</button>
-            </div>
-        `;
-        list.appendChild(row);
-        medicineCount++;
-    }
-</script>
+        document.getElementById('prescriptionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerText;
+            btn.innerText = "SAVING TO DATABASE...";
+            btn.disabled = true;
+
+            const medicines = [];
+            document.querySelectorAll('.medicine-row').forEach(row => {
+                medicines.push({
+                    name: row.querySelector('.med-name').value,
+                    dosage: row.querySelector('.med-dosage').value,
+                    duration: row.querySelector('.med-duration').value
+                });
+            });
+
+            const formData = {
+                appointmentId: document.querySelector('[name="appointmentId"]').value,
+                patientId: document.querySelector('[name="patientId"]').value,
+                diagnosis: document.getElementById('diagnosis').value,
+                instructions: document.getElementById('instructions').value,
+                medicines: medicines
+            };
+
+            try {
+                // Pointing to /doctor/prescription to match your protected routes
+                const response = await fetch('/doctor/prescription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    btn.innerText = "SUCCESSFUL!";
+                    btn.classList.replace('bg-blue-600', 'bg-emerald-500');
+                    setTimeout(() => {
+                        window.location.href = '/doctor/dashboard';
+                    }, 1000);
+                } else {
+                    alert("❌ Error: " + (result.message || "Failed to save"));
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                alert("Network error! Please check if your server is running.");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

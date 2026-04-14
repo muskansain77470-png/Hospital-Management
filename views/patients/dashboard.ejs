@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareSync | Patient Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-slate-50">
+
+    <%- include('../partials/header') %>
+
+    <main class="p-10 max-w-7xl mx-auto">
+        <div class="bg-blue-600 rounded-[3rem] p-12 text-white mb-10 relative overflow-hidden shadow-2xl shadow-blue-200">
+            <div class="relative z-10 flex justify-between items-center">
+                <div>
+                    <span class="bg-white/20 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Caresync Patient Portal</span>
+                    <h1 class="text-6xl font-black mt-4 mb-2 italic">Stay Healthy, <%= user.name %></h1>
+                    <p class="text-blue-100 font-medium">Welcome to your personalized health hub. Monitor your records and schedule visits instantly.</p>
+                </div>
+                <a href="/appointments/book" class="bg-white text-blue-600 px-8 py-4 rounded-2xl font-black uppercase text-xs hover:bg-slate-100 transition-all flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Book Appointment
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 flex items-center gap-6">
+                <div class="bg-blue-50 p-4 rounded-2xl text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Appointment Status</p>
+                    <h3 class="text-xl font-black text-slate-900"><%= appointments.length > 0 ? appointments[0].status : 'None Active' %></h3>
+                </div>
+            </div>
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 flex items-center gap-6">
+                <div class="bg-emerald-50 p-4 rounded-2xl text-emerald-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Medical Records</p>
+                    <h3 class="text-xl font-black text-slate-900"><%= prescriptions.length %> Ready</h3>
+                </div>
+            </div>
+            <div class="bg-slate-900 p-8 rounded-[2.5rem] shadow-xl text-white flex items-center gap-6">
+                <div class="bg-white/10 p-4 rounded-2xl text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Payment Info</p>
+                    <h3 class="text-xl font-black">Secured</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div class="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100">
+                <h2 class="text-xl font-black uppercase italic mb-8">Your Medical Visits</h2>
+                <div class="space-y-6">
+                    <% if(appointments.length > 0) { %>
+                        <% appointments.forEach(appt => { %>
+                            <div class="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                <div>
+                                    <h4 class="font-black text-slate-900">Dr. <%= appt.doctor.name %></h4>
+                                    <p class="text-xs text-slate-400"><%= new Date(appt.createdAt).toDateString() %></p>
+                                </div>
+                                <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-[8px] font-black uppercase">
+                                    <%= appt.status %>
+                                </span>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-slate-400 italic">No visits recorded yet.</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100">
+                <h2 class="text-xl font-black uppercase italic mb-8">Active Prescriptions</h2>
+                <div class="space-y-6">
+                    <% if(prescriptions.length > 0) { %>
+                        <% prescriptions.forEach(pr => { %>
+                            <div class="flex items-center justify-between p-6 bg-emerald-50/50 rounded-3xl border border-emerald-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="bg-emerald-500 text-white p-3 rounded-2xl">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-black text-slate-900"><%= pr.diagnosis %></h4>
+                                        <p class="text-[10px] text-emerald-600 font-bold uppercase">Issued by Dr. <%= pr.doctor.name %></p>
+                                    </div>
+                                </div>
+                                <a href="/patient/prescription/view/<%= pr._id %>" class="bg-slate-900 text-white p-3 rounded-xl hover:bg-slate-800 transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                </a>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-slate-400 italic">No prescriptions found.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+</body>
+</html>
