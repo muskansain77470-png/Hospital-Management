@@ -68,7 +68,7 @@
                         <% appointments.forEach(appt => { %>
                             <div class="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-blue-200 transition-all">
                                 <div>
-                                    <h4 class="font-black text-slate-900">Dr. <%= appt.doctor.name %></h4>
+                                    <h4 class="font-black text-slate-900">Dr. <%= appt.doctor ? appt.doctor.name : 'Unassigned' %></h4>
                                     <p class="text-xs text-slate-400"><%= new Date(appt.date).toDateString() %></p>
                                 </div>
                                 <span class="<% if(appt.status === 'Pending'){ %> bg-amber-100 text-amber-600 <% } else { %> bg-blue-100 text-blue-600 <% } %> px-3 py-1 rounded-full text-[8px] font-black uppercase">
@@ -96,7 +96,7 @@
                                     </div>
                                     <div>
                                         <h4 class="font-black text-slate-900"><%= pr.diagnosis %></h4>
-                                        <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">By Dr. <%= pr.doctor.name %></p>
+                                        <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">By Dr. <%= pr.doctor ? pr.doctor.name : 'Unknown' %></p>
                                     </div>
                                 </div>
                                 <a href="/patient/history" class="bg-slate-900 text-white p-3 rounded-xl hover:bg-slate-800 transition-all">
@@ -115,16 +115,16 @@
     <%- include('../partials/footer') %>
 
     <script>
-        // Controller se aayi unread notifications ko access kar rahe hain
+        // Use a safe fallback for notifications
         const notifications = <%- JSON.stringify(typeof notifications !== 'undefined' ? notifications : []) %>;
 
-        if (notifications.length > 0) {
+        if (notifications && notifications.length > 0) {
             notifications.forEach(notif => {
                 Swal.fire({
                     title: '<span style="font-family:Plus Jakarta Sans; font-weight:800; font-style:italic; text-transform:uppercase;">Health Update</span>',
                     text: notif.message,
                     icon: notif.type || 'success',
-                    confirmButtonColor: '#2563eb', // Blue theme match
+                    confirmButtonColor: '#2563eb',
                     confirmButtonText: 'Got it!',
                     background: '#f8fafc',
                     customClass: {

@@ -1,5 +1,9 @@
 const express = require('express');
 const router = express.Router();
+
+// FIXED: Looking at your folder structure, the file is named 'Patient.js'
+const Patient = require('../models/Patient'); 
+
 // Controller functions import
 const { 
     getBillingDashboard, 
@@ -12,42 +16,60 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 
 /**
  * 🔐 MIDDLEWARE
- * Sabhi staff routes ko protect aur authorize hona zaroori hai.
+ * Role authorization check
  */
-router.use(protect);
 router.use(authorize('staff', 'admin', 'receptionist'));
 
-// --- VIEW ROUTES (Browser mein page dikhane ke liye) ---
+// --- VIEW ROUTES ---
+
+/**
+ * @route   GET /staff/dashboard
+ */
+router.get('/dashboard', (req, res) => {
+    res.render('staff/dashboard', { 
+        user: req.user,
+        title: 'Staff Dashboard' 
+    });
+});
 
 /**
  * @route   GET /staff/billing
- * @desc    Renders billing.ejs with pending appointments and patient list
  */
 router.get('/billing', getBillingDashboard);
 
 /**
  * @route   GET /staff/patients
- * @desc    Renders patient registry view for staff
  */
-router.get('/patients', (req, res) => {
-    res.render('patients/patient', { 
-        user: req.user,
-        title: 'Patient Registry' 
-    });
+router.get('/patients', async (req, res) => {
+    try {
+        // Fetching from the correctly imported 'Patient' model
+        const patients = await Patient.find({}).sort({ createdAt: -1 });
+
+        res.render('patients/patient', { 
+            user: req.user,
+            title: 'Patient Registry',
+            patients: patients 
+        });
+    } catch (error) {
+        console.error("Error loading patients:", error);
+        res.render('patients/patient', { 
+            user: req.user,
+            title: 'Patient Registry',
+            patients: [] 
+        });
+    }
 });
 
 
-// --- ACTION / API ROUTES (Data handle karne ke liye) ---
+// --- ACTION / API ROUTES ---
 
 /**
  * @route   POST /staff/billing/create
- * @desc    Process payment and generate bill
  */
 router.post('/billing/create', createBill);
 
 /**
  * @route   POST /staff/patients/register
- * @desc    Quick patient registration by staff/receptionist
  */
 router.post('/patients/register', registerPatient);
 

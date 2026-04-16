@@ -18,15 +18,18 @@ const patientSchema = mongoose.Schema({
     phone: { 
         type: String, 
         required: [true, "Contact number is required"],
-        unique: true, // Ek phone number se ek hi patient register hoga
+        unique: true, // This requires the index to be created in MongoDB
         trim: true
     },
     bloodGroup: { 
         type: String,
-        enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+        enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Not Specified'],
         default: 'Not Specified'
     },
-    address: String,
+    address: {
+        type: String,
+        trim: true
+    },
     medicalHistory: [{ 
         condition: String, 
         date: { type: Date, default: Date.now },
@@ -34,9 +37,12 @@ const patientSchema = mongoose.Schema({
     }],
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Jis staff ya doctor ne register kiya
+        ref: 'User', 
         required: true
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Patient', patientSchema);
+// Prevent model overwrite error during development (Nodemon reloads)
+const Patient = mongoose.models.Patient || mongoose.model('Patient', patientSchema);
+
+module.exports = Patient;

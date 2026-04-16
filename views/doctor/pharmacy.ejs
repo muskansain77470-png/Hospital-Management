@@ -6,9 +6,17 @@
     <title>Pharmacy | CareSync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        /* Print styles for Export Report */
+        @media print {
+            body * { visibility: hidden; }
+            #inventory-table, #inventory-table * { visibility: visible; }
+            #inventory-table { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -16,18 +24,22 @@
     <%- include('../partials/header') %>
 
     <main class="max-w-7xl mx-auto px-6 py-12">
-        <div class="flex justify-between items-end mb-12">
+        <div class="flex justify-between items-end mb-12 no-print">
             <div>
                 <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Pharmacy <span class="text-blue-600">Inventory</span></h1>
                 <p class="text-slate-500 font-medium mt-2">Manage medical stock and dispensed prescriptions.</p>
             </div>
             <div class="flex gap-4">
-                <button class="bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-2xl font-bold hover:bg-slate-50 transition-all shadow-sm">Export Report</button>
-                <button class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">+ Add Medicine</button>
+                <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-2xl font-bold hover:bg-slate-50 transition-all shadow-sm">
+                    Export Report
+                </button>
+                <button onclick="toggleModal('medicineModal')" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+                    + Add Medicine
+                </button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 no-print">
             <div class="glass-card p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50">
                 <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
@@ -41,7 +53,7 @@
                     <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.268 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </div>
                 <h3 class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Low Stock Alert</h3>
-                <p class="text-4xl font-black text-slate-900 text-amber-600">12</p>
+                <p class="text-4xl font-black text-amber-600">12</p>
             </div>
 
             <div class="glass-card p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50">
@@ -53,7 +65,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-[3rem] shadow-2xl shadow-slate-200/60 overflow-hidden border border-slate-100">
+        <div id="inventory-table" class="bg-white rounded-[3rem] shadow-2xl shadow-slate-200/60 overflow-hidden border border-slate-100">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50/50 border-b border-slate-100">
@@ -66,7 +78,7 @@
                 <tbody class="divide-y divide-slate-50">
                     <tr class="hover:bg-slate-50/50 transition-all cursor-pointer">
                         <td class="px-10 py-6 font-bold text-slate-800">Paracetamol 500mg</td>
-                        <td class="px-10 py-6 font-medium text-slate-500 text-sm font-semibold italic">Analgesic</td>
+                        <td class="px-10 py-6 font-medium text-slate-500 text-sm italic">Analgesic</td>
                         <td class="px-10 py-6 font-bold text-slate-700">450 Units</td>
                         <td class="px-10 py-6">
                             <span class="px-4 py-1.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 uppercase tracking-widest">In Stock</span>
@@ -74,8 +86,8 @@
                     </tr>
                     <tr class="hover:bg-slate-50/50 transition-all cursor-pointer">
                         <td class="px-10 py-6 font-bold text-slate-800">Amoxicillin</td>
-                        <td class="px-10 py-6 font-medium text-slate-500 text-sm font-semibold italic">Antibiotic</td>
-                        <td class="px-10 py-6 font-bold text-slate-700 text-amber-600">12 Units</td>
+                        <td class="px-10 py-6 font-medium text-slate-500 text-sm italic">Antibiotic</td>
+                        <td class="px-10 py-6 font-bold text-amber-600">12 Units</td>
                         <td class="px-10 py-6">
                             <span class="px-4 py-1.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-700 uppercase tracking-widest">Low Stock</span>
                         </td>
@@ -84,5 +96,50 @@
             </table>
         </div>
     </main>
+
+    <div id="medicineModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white p-10 rounded-[3rem] w-full max-w-md shadow-2xl border border-slate-100 transform transition-all">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black italic">Add <span class="text-blue-600">Stock</span></h2>
+                <button onclick="toggleModal('medicineModal')" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+            </div>
+            
+            <form action="/doctor/pharmacy/add" method="POST" class="space-y-5">
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 mb-2 block">Medicine Name</label>
+                    <input type="text" name="name" required placeholder="e.g. Ibuprofen" class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-blue-500 outline-none font-bold">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 mb-2 block">Category</label>
+                    <select name="category" class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-blue-500 outline-none font-bold">
+                        <option value="Analgesic">Analgesic</option>
+                        <option value="Antibiotic">Antibiotic</option>
+                        <option value="Antipyretic">Antipyretic</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 mb-2 block">Initial Stock</label>
+                    <input type="number" name="stockLevel" required placeholder="0" class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-blue-500 outline-none font-bold">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase text-xs shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all mt-4">
+                    Confirm Addition
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.toggle('hidden');
+        }
+
+        // Close modal if clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('medicineModal');
+            if (event.target == modal) toggleModal('medicineModal');
+        }
+    </script>
 </body>
 </html>

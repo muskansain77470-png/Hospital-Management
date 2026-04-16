@@ -1,0 +1,109 @@
+<div class="min-h-screen bg-gray-100 flex">
+    
+    <aside class="w-64 bg-slate-800 text-white hidden md:block">
+        <div class="p-6 text-2xl font-bold border-b border-slate-700">
+            CareSync <span class="text-blue-400">HMS</span>
+        </div>
+        <nav class="mt-6">
+            <a href="/staff/dashboard" class="flex items-center py-3 px-6 bg-blue-600 text-white">
+                <i class="fas fa-th-large mr-3"></i> Dashboard
+            </a>
+            <a href="/staff/patients" class="flex items-center py-3 px-6 text-gray-300 hover:bg-slate-700 hover:text-white transition">
+                <i class="fas fa-user-injured mr-3"></i> Patient Registry
+            </a>
+            <a href="/staff/billing" class="flex items-center py-3 px-6 text-gray-300 hover:bg-slate-700 hover:text-white transition">
+                <i class="fas fa-file-invoice-dollar mr-3"></i> Billing & Payments
+            </a>
+            <a href="/appointments" class="flex items-center py-3 px-6 text-gray-300 hover:bg-slate-700 hover:text-white transition">
+                <i class="fas fa-calendar-check mr-3"></i> Appointments
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1">
+        <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-semibold text-gray-800">Staff Control Panel</h1>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-600">Welcome, <strong class="text-blue-600"><%= user.name %></strong></span>
+                <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </header>
+
+        <div class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-blue-100 rounded-full text-blue-600">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-500 uppercase font-bold tracking-wider">Total Patients</p>
+                            <h3 class="text-2xl font-bold">1,284</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-green-100 rounded-full text-green-600">
+                            <i class="fas fa-coins fa-2x"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-500 uppercase font-bold tracking-wider">Today's Revenue</p>
+                            <h3 class="text-2xl font-bold">$4,250</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-500">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-yellow-100 rounded-full text-yellow-600">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-500 uppercase font-bold tracking-wider">Pending Bills</p>
+                            <h3 class="text-2xl font-bold">12</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Quick Shortcuts</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="/staff/patients" class="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg hover:bg-blue-50 transition border border-gray-100">
+                            <i class="fas fa-user-plus text-blue-500 text-3xl mb-2"></i>
+                            <span class="font-medium text-gray-700">Register Patient</span>
+                        </a>
+                        <a href="/staff/billing" class="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg hover:bg-green-50 transition border border-gray-100">
+                            <i class="fas fa-receipt text-green-500 text-3xl mb-2"></i>
+                            <span class="font-medium text-gray-700">New Bill</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">System Status</h2>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 italic">Role Access:</span>
+                            <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold uppercase">
+                                <%= user.role %>
+                            </span>
+                        </div>
+                        <div class="p-4 bg-blue-50 rounded-lg text-blue-800 text-sm">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            You have 5 new appointment requests waiting for approval in the appointments tab.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>

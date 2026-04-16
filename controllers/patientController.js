@@ -11,16 +11,21 @@ exports.getPatientDashboard = async (req, res) => {
 
         const [appointments, prescriptions, notifications] = await Promise.all([
             Appointment.find(query)
-                .populate('doctor', 'name')
+                .populate('doctor', 'name') // Fetches only the name from User model
                 .sort({ date: 1, time: 1 })
-                .limit(5),
+                .limit(5)
+                .lean(), // Converts to plain JS object for faster rendering/safety
             Prescription.find(query)
-                .populate('doctor', 'name'),
-            Notification.find({ patient: req.user._id, isRead: false }).sort({ createdAt: -1 })
+                .populate('doctor', 'name')
+                .lean(),
+            Notification.find({ patient: req.user._id, isRead: false })
+                .sort({ createdAt: -1 })
+                .lean()
         ]);
 
         res.render('patients/dashboard', { 
             user: req.user, 
+            // FIXED: If appointments exist, they are passed; otherwise empty array
             appointments: appointments || [],
             prescriptions: prescriptions || [],
             notifications: notifications || [], 
@@ -28,6 +33,7 @@ exports.getPatientDashboard = async (req, res) => {
             roleName: 'Patient'
         });
 
+        // Mark notifications as read after loading the dashboard
         if (notifications.length > 0) {
             await Notification.updateMany(
                 { patient: req.user._id, isRead: false },
@@ -43,12 +49,10 @@ exports.getPatientDashboard = async (req, res) => {
 // @desc    User Story 4: Show booking page
 exports.getBookingPage = async (req, res) => {
     try {
+        // Only fetch users who have the role 'doctor'
         const doctors = await User.find({ role: 'doctor' }).select('name email');
         
-        /**
-         * FIXED: Aapke folder structure ke hisaab se path 'appointments/book' hona chahiye.
-         * VS Code sidebar check karein: views > appointments > book.ejs
-         */
+        // FIXED: Ensuring path matches your views folder structure
         res.render('appointments/book', { 
             user: req.user, 
             doctors,
@@ -70,6 +74,7 @@ exports.bookAppointment = async (req, res) => {
             return res.redirect('/patient/book?error=Please fill all required fields');
         }
 
+        // Check if the doctor is already booked for this specific slot
         const existingAppointment = await Appointment.findOne({ 
             doctor: doctorId, 
             date, 
@@ -103,10 +108,12 @@ exports.getMedicalHistory = async (req, res) => {
         const [history, prescriptions] = await Promise.all([
             Appointment.find({ patient: req.user._id })
                 .populate('doctor', 'name')
-                .sort({ date: -1 }),
+                .sort({ date: -1 })
+                .lean(),
             Prescription.find({ patient: req.user._id })
                 .populate('doctor', 'name')
                 .sort({ createdAt: -1 })
+                .lean()
         ]);
 
         res.render('patients/history', { 

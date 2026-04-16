@@ -2,14 +2,13 @@ const Appointment = require('../models/Appointment');
 const Prescription = require('../models/Prescription');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const Medicine = require('../models/Medicine'); // Import the new model
 
 // 1. Dashboard Logic
-// @route   GET /doctor/dashboard
 exports.getDoctorDashboard = async (req, res) => {
     try {
         const query = { doctor: req.user._id };
         
-        // Fetching stats and recent appointments
         const [activePatients, pendingCount, appointments] = await Promise.all([
             Appointment.distinct('patient', query),
             Appointment.countDocuments({ ...query, status: 'Pending' }),
@@ -28,7 +27,7 @@ exports.getDoctorDashboard = async (req, res) => {
             },
             recentAppointments: appointments || [],
             title: 'Doctor Dashboard',
-            layout: false // Custom dashboard layout manually handled
+            layout: false 
         });
     } catch (error) {
         console.error("Doctor Dashboard Error:", error);
@@ -37,14 +36,12 @@ exports.getDoctorDashboard = async (req, res) => {
 };
 
 // 2. Get All Patients List
-// @route   GET /doctor/patients
 exports.getPatientsList = async (req, res) => {
     try {
         const appointments = await Appointment.find({ doctor: req.user._id })
             .populate('patient', 'name email phone gender age')
             .sort({ createdAt: -1 });
         
-        // Removing duplicates to show unique patients
         const uniquePatients = [];
         const patientIds = new Set();
         
@@ -55,7 +52,8 @@ exports.getPatientsList = async (req, res) => {
             }
         });
 
-        res.render('doctor/patients', { // Path ensures it matches your views folder
+        // FIXED: Based on your screenshot, the file is in views/patients/patient.ejs
+        res.render('patients/patient', { 
             user: req.user, 
             patients: uniquePatients,
             title: 'My Patients',
@@ -67,34 +65,63 @@ exports.getPatientsList = async (req, res) => {
     }
 };
 
-// 3. Pharmacy Management View
-exports.getPharmacy = (req, res) => {
-    res.render('doctor/pharmacy', { 
-        user: req.user, 
-        title: 'Pharmacy Management', 
-        layout: false 
-    });
+// 3. Pharmacy Management View (DYNAMIC DATA)
+exports.getPharmacy = async (req, res) => {
+    try {
+        // Fetch real medicines from MongoDB
+        const medicines = await Medicine.find().sort({ name: 1 }); 
+
+        res.render('doctor/pharmacy', { 
+            user: req.user, 
+            medicines: medicines, 
+            title: 'Pharmacy Management', 
+            layout: false 
+        });
+    } catch (error) {
+        console.error("Pharmacy fetch error:", error);
+        res.status(500).send("Pharmacy data load nahi ho saka.");
+    }
 };
 
-// 4. Update Status (AJAX Call from Doctor Dashboard)
-// @route   PATCH /doctor/status/:id
+// 4. Add Medicine Logic (DYNAMIC)
+exports.addMedicine = async (req, res) => {
+    try {
+        const { name, category, stockLevel } = req.body;
+
+        if (!name || !stockLevel) {
+            return res.status(400).send("Medicine Name and Stock are required.");
+        }
+
+        // Create in DB - status is handled by Medicine.js pre-save middleware
+        await Medicine.create({
+            name,
+            category,
+            stockLevel: parseInt(stockLevel)
+        });
+
+        console.log("New Medicine Added Successfully:", name);
+        res.redirect('/doctor/pharmacy'); 
+    } catch (error) {
+        console.error("Add Medicine Error:", error);
+        res.status(500).send("Medicine add karne mein error: " + error.message);
+    }
+};
+
+// 5. Update Appointment Status
 exports.updateStatus = async (req, res) => {
     try {
         const { status } = req.body;
         const appointmentId = req.params.id;
-
         const appointment = await Appointment.findById(appointmentId);
 
         if (!appointment) {
             return res.status(404).json({ success: false, message: "Appointment nahi mila." });
         }
 
-        // Only update and notify if status is actually different
         if (appointment.status !== status) {
             appointment.status = status || 'Completed';
             await appointment.save();
 
-            // Create real-time notification for patient
             await Notification.create({
                 patient: appointment.patient,
                 message: `Status Update: Your appointment is now ${status.toUpperCase()}.`,
@@ -109,8 +136,7 @@ exports.updateStatus = async (req, res) => {
     }
 };
 
-// 5. Add Prescription & Close Appointment
-// @route   POST /doctor/prescribe
+// 6. Add Prescription & Close Appointment
 exports.addPrescription = async (req, res) => {
     try {
         const { appointmentId, patientId, medicines, instructions, diagnosis } = req.body;
@@ -119,7 +145,6 @@ exports.addPrescription = async (req, res) => {
             return res.status(400).json({ success: false, message: "Diagnosis and IDs are required." });
         }
         
-        // Create Prescription entry
         const prescription = await Prescription.create({
             appointment: appointmentId,
             doctor: req.user._id,
@@ -129,13 +154,11 @@ exports.addPrescription = async (req, res) => {
             diagnosis
         });
 
-        // Update Appointment status and link prescription
         await Appointment.findByIdAndUpdate(appointmentId, { 
             status: 'Completed', 
             prescription: prescription._id 
         });
 
-        // Notify patient about the new prescription
         await Notification.create({
             patient: patientId,
             message: `New Medical Record: Dr. ${req.user.name} has issued a new prescription for you.`,

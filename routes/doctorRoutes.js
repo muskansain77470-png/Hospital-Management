@@ -7,7 +7,8 @@ const {
     addPrescription,
     updateStatus,
     getPatientsList,
-    getPharmacy
+    getPharmacy,
+    addMedicine // New controller function
 } = require('../controllers/doctorController');
 
 // 🔐 MIDDLEWARE - Only Doctors allowed
@@ -19,11 +20,14 @@ router.get('/dashboard', getDoctorDashboard);
 router.get('/patients', getPatientsList);
 router.get('/pharmacy', getPharmacy);
 
+// --- Pharmacy Logic ---
+// Process new medicine addition
+router.post('/pharmacy/add', addMedicine); 
+
 // --- Schedules ---
-router.get('/schedules', getDoctorDashboard); // Reusing dashboard logic to show appointments
+router.get('/schedules', getDoctorDashboard); 
 
 // --- Prescription Views & Logic ---
-// 1. Show the prescription form
 router.get('/prescription/:id', async (req, res) => {
     try {
         const appointment = await Appointment.findById(req.params.id).populate('patient');
@@ -41,14 +45,9 @@ router.get('/prescription/:id', async (req, res) => {
     }
 });
 
-// 2. Process prescription submission
 router.post('/prescribe', addPrescription);
 
-// --- Status Update Logic (AJAX Compatible) ---
-/**
- * FIXED: Method changed to PATCH to match standard AJAX status updates.
- * URL: /doctor/status/:id
- */
+// --- Status Update Logic ---
 router.patch('/status/:id', updateStatus); 
 
 module.exports = router;
