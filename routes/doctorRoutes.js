@@ -10,35 +10,45 @@ const {
     getPharmacy
 } = require('../controllers/doctorController');
 
+// 🔐 MIDDLEWARE - Only Doctors allowed
 router.use(protect);
 router.use(authorize('doctor'));
 
-// Main Navigation Routes
+// --- Main Navigation Routes ---
 router.get('/dashboard', getDoctorDashboard);
 router.get('/patients', getPatientsList);
 router.get('/pharmacy', getPharmacy);
 
-// Schedules (Reusing dashboard logic or separate view)
-router.get('/schedules', (req, res) => {
-    res.render('doctor/dashboard', { 
-        user: req.user, title: 'Schedules', layout: false,
-        stats: { activePatients: 0, pending: 0, total: 0 },
-        recentAppointments: []
-    });
-});
+// --- Schedules ---
+router.get('/schedules', getDoctorDashboard); // Reusing dashboard logic to show appointments
 
-// Prescription Logic
+// --- Prescription Views & Logic ---
+// 1. Show the prescription form
 router.get('/prescription/:id', async (req, res) => {
     try {
         const appointment = await Appointment.findById(req.params.id).populate('patient');
-        if (!appointment) return res.status(404).send("Not Found");
-        res.render('doctor/prescription', { user: req.user, appointment, title: 'Prescription', layout: false });
+        if (!appointment) return res.status(404).send("Appointment Not Found");
+        
+        res.render('doctor/prescription', { 
+            user: req.user, 
+            appointment, 
+            title: 'Write Prescription', 
+            layout: false 
+        });
     } catch (err) {
+        console.error(err);
         res.status(500).send("Server Error");
     }
 });
 
-router.post('/prescription', addPrescription);
-router.post('/check-in/:id', updateStatus); 
+// 2. Process prescription submission
+router.post('/prescribe', addPrescription);
+
+// --- Status Update Logic (AJAX Compatible) ---
+/**
+ * FIXED: Method changed to PATCH to match standard AJAX status updates.
+ * URL: /doctor/status/:id
+ */
+router.patch('/status/:id', updateStatus); 
 
 module.exports = router;

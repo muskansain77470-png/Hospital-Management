@@ -6,6 +6,7 @@
     <title>CareSync | Patient Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
 </head>
 <body class="bg-slate-50">
@@ -20,8 +21,8 @@
                     <h1 class="text-6xl font-black mt-4 mb-2 italic">Stay Healthy, <%= user.name %></h1>
                     <p class="text-blue-100 font-medium">Welcome to your personalized health hub. Monitor your records and schedule visits instantly.</p>
                 </div>
-                <a href="/appointments/book" class="bg-white text-blue-600 px-8 py-4 rounded-2xl font-black uppercase text-xs hover:bg-slate-100 transition-all flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold">
+                <a href="/patient/book" class="bg-white text-blue-600 px-8 py-4 rounded-2xl font-black uppercase text-xs hover:bg-slate-100 transition-all flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Book Appointment
@@ -53,24 +54,24 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                 </div>
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Payment Info</p>
-                    <h3 class="text-xl font-black">Secured</h3>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Secure Portal</p>
+                    <h3 class="text-xl font-black italic text-blue-400">Verified</h3>
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <div class="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100">
-                <h2 class="text-xl font-black uppercase italic mb-8">Your Medical Visits</h2>
+                <h2 class="text-xl font-black uppercase italic mb-8">Recent Visits</h2>
                 <div class="space-y-6">
                     <% if(appointments.length > 0) { %>
                         <% appointments.forEach(appt => { %>
-                            <div class="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                            <div class="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:border-blue-200 transition-all">
                                 <div>
                                     <h4 class="font-black text-slate-900">Dr. <%= appt.doctor.name %></h4>
-                                    <p class="text-xs text-slate-400"><%= new Date(appt.createdAt).toDateString() %></p>
+                                    <p class="text-xs text-slate-400"><%= new Date(appt.date).toDateString() %></p>
                                 </div>
-                                <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-[8px] font-black uppercase">
+                                <span class="<% if(appt.status === 'Pending'){ %> bg-amber-100 text-amber-600 <% } else { %> bg-blue-100 text-blue-600 <% } %> px-3 py-1 rounded-full text-[8px] font-black uppercase">
                                     <%= appt.status %>
                                 </span>
                             </div>
@@ -82,7 +83,7 @@
             </div>
 
             <div class="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100">
-                <h2 class="text-xl font-black uppercase italic mb-8">Active Prescriptions</h2>
+                <h2 class="text-xl font-black uppercase italic mb-8">Prescriptions</h2>
                 <div class="space-y-6">
                     <% if(prescriptions.length > 0) { %>
                         <% prescriptions.forEach(pr => { %>
@@ -90,15 +91,15 @@
                                 <div class="flex items-center gap-4">
                                     <div class="bg-emerald-500 text-white p-3 rounded-2xl">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                                            <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4 4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
                                         </svg>
                                     </div>
                                     <div>
                                         <h4 class="font-black text-slate-900"><%= pr.diagnosis %></h4>
-                                        <p class="text-[10px] text-emerald-600 font-bold uppercase">Issued by Dr. <%= pr.doctor.name %></p>
+                                        <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">By Dr. <%= pr.doctor.name %></p>
                                     </div>
                                 </div>
-                                <a href="/patient/prescription/view/<%= pr._id %>" class="bg-slate-900 text-white p-3 rounded-xl hover:bg-slate-800 transition-all">
+                                <a href="/patient/history" class="bg-slate-900 text-white p-3 rounded-xl hover:bg-slate-800 transition-all">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 </a>
                             </div>
@@ -113,5 +114,28 @@
 
     <%- include('../partials/footer') %>
 
+    <script>
+        // Controller se aayi unread notifications ko access kar rahe hain
+        const notifications = <%- JSON.stringify(typeof notifications !== 'undefined' ? notifications : []) %>;
+
+        if (notifications.length > 0) {
+            notifications.forEach(notif => {
+                Swal.fire({
+                    title: '<span style="font-family:Plus Jakarta Sans; font-weight:800; font-style:italic; text-transform:uppercase;">Health Update</span>',
+                    text: notif.message,
+                    icon: notif.type || 'success',
+                    confirmButtonColor: '#2563eb', // Blue theme match
+                    confirmButtonText: 'Got it!',
+                    background: '#f8fafc',
+                    customClass: {
+                        popup: 'rounded-[2rem] border-4 border-white shadow-2xl',
+                        confirmButton: 'rounded-xl font-black uppercase text-xs px-8 py-3'
+                    },
+                    timer: 6000,
+                    timerProgressBar: true
+                });
+            });
+        }
+    </script>
 </body>
 </html>

@@ -42,6 +42,9 @@ app.get('/signup', (req, res) => {
 });
 
 // --- DASHBOARD REDIRECTOR ---
+/**
+ * FIXED: Redirects based on role to correct URL structures.
+ */
 app.get('/dashboard', protect, (req, res) => {
     if (req.user.role === 'doctor') {
         return res.redirect('/doctor/dashboard');
@@ -52,17 +55,22 @@ app.get('/dashboard', protect, (req, res) => {
     if (req.user.role === 'admin') {
         return res.redirect('/admin/dashboard');
     }
-    res.redirect('/patients/dashboard'); 
+    // Redirecting to singular '/patient' to match route mounting
+    res.redirect('/patient/dashboard'); 
 });
 
 // --- ROUTE MOUNTING ---
-// API Routes
+
+// API Routes (Auth logic: Login/Register)
 app.use('/api/auth', require('./routes/authRoutes'));
 
-// View Routes with Role Protection
-app.use('/doctor', protect, require('./routes/doctorRoutes')); // All /doctor/* routes protected
+/**
+ * FIXED MOUNTING: 
+ * Changed '/patients' to '/patient' to solve the "Cannot GET /patient/book" error.
+ */
+app.use('/doctor', protect, require('./routes/doctorRoutes'));
 app.use('/staff', protect, require('./routes/staffRoutes'));
-app.use('/patients', protect, require('./routes/patientRoutes')); 
+app.use('/patient', protect, require('./routes/patientRoutes')); 
 app.use('/appointments', protect, require('./routes/appointmentRoutes'));
 
 // --- LOGOUT ---
