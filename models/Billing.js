@@ -11,7 +11,7 @@ const billingSchema = new mongoose.Schema({
         ref: 'Appointment',
         required: [true, "Bill must be linked to an appointment"]
     },
-    // User Story 9: Itemized billing (Consultation, Tests, Medicines)
+    // Itemized billing (Consultation, Tests, Medicines)
     items: [{
         serviceName: { type: String, required: true },
         cost: { type: Number, required: true }
@@ -23,14 +23,13 @@ const billingSchema = new mongoose.Schema({
     },
     tax: {
         type: Number,
-        default: 0 // e.g., GST or Hospital Service Tax
+        default: 0 
     },
     totalAmount: {
         type: Number,
         required: true,
         default: 0
     },
-    // User Story 6: Online Payment Status
     status: {
         type: String,
         enum: ['Unpaid', 'Paid', 'Partially Paid', 'Cancelled'],
@@ -43,7 +42,7 @@ const billingSchema = new mongoose.Schema({
     },
     generatedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Staff/Receptionist
+        ref: 'User', 
         required: true
     },
     invoiceNumber: {
@@ -52,16 +51,22 @@ const billingSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Pre-save hook: Auto-calculate total amount and generate Invoice Number
-billingSchema.pre('save', function(next) {
-    // Calculate subTotal from items array
-    this.subTotal = this.items.reduce((sum, item) => sum + item.cost, 0);
+// ✅ FIXED: Pre-save hook for Auto-calculations
+billingSchema.pre('validate', function(next) {
+    // 1. Calculate subTotal from items array
+    if (this.items && this.items.length > 0) {
+        this.subTotal = this.items.reduce((sum, item) => sum + item.cost, 0);
+    } else {
+        this.subTotal = 0;
+    }
     
-    // Add tax (e.g., 5%)
+    // 2. Add tax (5%)
     this.tax = this.subTotal * 0.05;
+    
+    // 3. Final Total
     this.totalAmount = this.subTotal + this.tax;
 
-    // Generate Invoice ID if not exists (e.g., INV-2026-XXXX)
+    // 4. Generate Invoice ID if not exists
     if (!this.invoiceNumber) {
         this.invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
     }

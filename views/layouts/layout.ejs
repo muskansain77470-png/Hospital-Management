@@ -12,22 +12,30 @@
 </head>
 <body class="bg-slate-50 min-h-screen">
     
-    <nav class="bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center">
+    <nav class="bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center shadow-sm">
         <div class="flex items-center space-x-2">
             <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011-1v5m-4 0h4"></path></svg>
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011-1v5m-4 0h4"></path>
+                </svg>
             </div>
-            <span class="font-bold text-slate-900 tracking-tight">CareSync</span>
+            <span class="font-bold text-slate-900 tracking-tight text-lg">CareSync</span>
         </div>
+
         <% if (locals.user) { %>
-            <div class="flex items-center space-x-4">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest"><%= user.role %>: <%= user.name %></span>
-                <a href="/api/auth/logout" class="text-xs font-bold text-red-500 hover:text-red-700 uppercase">Logout</a>
+            <div class="flex items-center space-x-6">
+                <div class="text-right">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Signed in as</p>
+                    <p class="text-xs font-bold text-slate-900 uppercase tracking-tight"><%= user.name %> (<%= user.role %>)</p>
+                </div>
+                <a href="/logout" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-red-100 transition-colors">
+                    Logout
+                </a>
             </div>
         <% } %>
     </nav>
 
-    <main>
+    <main class="p-6">
         <%- body %>
     </main>
 

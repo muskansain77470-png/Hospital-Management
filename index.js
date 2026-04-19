@@ -20,9 +20,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('layout', 'layouts/layout'); // Global layout file
 
 // --- MIDDLEWARE ---
-app.use(cookieParser()); 
-app.use(express.json());
+/**
+ * Essential for parsing JSON sent via fetch() from your billing page
+ */
+app.use(express.json()); 
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser()); 
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- GUEST ROUTES (Landing & Auth) ---
@@ -60,9 +63,7 @@ app.get('/dashboard', protect, (req, res) => {
 // API Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 
-/**
- * FIXED: All routes correctly using 'app.use'
- */
+// Protected Module Routes
 app.use('/doctor', protect, require('./routes/doctorRoutes'));
 app.use('/staff', protect, require('./routes/staffRoutes'));
 app.use('/patient', protect, require('./routes/patientRoutes')); 
@@ -74,7 +75,21 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+// --- 404 HANDLER ---
+/**
+ * Catch-all for routes that don't exist
+ */
+app.use((req, res, next) => {
+    const error = new Error(`Not Found - ${req.originalUrl}`);
+    res.status(404);
+    next(error);
+});
+
 // --- ERROR HANDLING ---
+/**
+ * This must be the last middleware.
+ * It will catch errors from your controllers and middleware.
+ */
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

@@ -8,20 +8,24 @@ const {
     updateStatus,
     getPatientsList,
     getPharmacy,
-    addMedicine // New controller function
+    addMedicine,
+    addPatient // <--- Ensure this is being imported!
 } = require('../controllers/doctorController');
 
-// 🔐 MIDDLEWARE - Only Doctors allowed
+// 🔐 MIDDLEWARE
 router.use(protect);
-router.use(authorize('doctor'));
+router.use(authorize('doctor', 'staff'));
 
 // --- Main Navigation Routes ---
 router.get('/dashboard', getDoctorDashboard);
 router.get('/patients', getPatientsList);
 router.get('/pharmacy', getPharmacy);
 
+// --- Patient Logic ---
+// Line 26: This was causing the crash because addPatient was undefined
+router.post('/patients/add', addPatient); 
+
 // --- Pharmacy Logic ---
-// Process new medicine addition
 router.post('/pharmacy/add', addMedicine); 
 
 // --- Schedules ---
@@ -47,7 +51,6 @@ router.get('/prescription/:id', async (req, res) => {
 
 router.post('/prescribe', addPrescription);
 
-// --- Status Update Logic ---
 router.patch('/status/:id', updateStatus); 
 
 module.exports = router;

@@ -2,7 +2,9 @@ const Appointment = require('../models/Appointment');
 const Prescription = require('../models/Prescription');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
-const Medicine = require('../models/Medicine'); // Import the new model
+const Medicine = require('../models/Medicine');
+// Assuming you have a Patient model, import it here:
+const Patient = require('../models/Patient'); 
 
 // 1. Dashboard Logic
 exports.getDoctorDashboard = async (req, res) => {
@@ -52,7 +54,6 @@ exports.getPatientsList = async (req, res) => {
             }
         });
 
-        // FIXED: Based on your screenshot, the file is in views/patients/patient.ejs
         res.render('patients/patient', { 
             user: req.user, 
             patients: uniquePatients,
@@ -65,10 +66,27 @@ exports.getPatientsList = async (req, res) => {
     }
 };
 
-// 3. Pharmacy Management View (DYNAMIC DATA)
+// --- NEW: Add Patient Logic ---
+exports.addPatient = async (req, res) => {
+    try {
+        const { name, phone, age } = req.body;
+        
+        if (!name || !phone) {
+            return res.status(400).json({ success: false, message: "Name and Phone are required." });
+        }
+
+        await Patient.create({ name, phone, age });
+        
+        res.status(201).json({ success: true, message: "Patient saved successfully!" });
+    } catch (error) {
+        console.error("Add Patient Error:", error);
+        res.status(500).json({ success: false, message: "Failed to save patient." });
+    }
+};
+
+// 3. Pharmacy Management View
 exports.getPharmacy = async (req, res) => {
     try {
-        // Fetch real medicines from MongoDB
         const medicines = await Medicine.find().sort({ name: 1 }); 
 
         res.render('doctor/pharmacy', { 
@@ -83,7 +101,7 @@ exports.getPharmacy = async (req, res) => {
     }
 };
 
-// 4. Add Medicine Logic (DYNAMIC)
+// 4. Add Medicine Logic
 exports.addMedicine = async (req, res) => {
     try {
         const { name, category, stockLevel } = req.body;
@@ -92,14 +110,12 @@ exports.addMedicine = async (req, res) => {
             return res.status(400).send("Medicine Name and Stock are required.");
         }
 
-        // Create in DB - status is handled by Medicine.js pre-save middleware
         await Medicine.create({
             name,
             category,
             stockLevel: parseInt(stockLevel)
         });
 
-        console.log("New Medicine Added Successfully:", name);
         res.redirect('/doctor/pharmacy'); 
     } catch (error) {
         console.error("Add Medicine Error:", error);

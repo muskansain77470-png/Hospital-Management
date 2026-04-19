@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-slate-50 p-6 lg:p-12">
     <div class="max-w-6xl mx-auto space-y-10">
-        
+
         <div class="flex flex-col md:flex-row justify-between items-center bg-white p-8 rounded-[2.5rem] border border-slate-200/60 shadow-sm gap-4">
             <div>
                 <h1 class="text-4xl font-black text-slate-900 tracking-tight">Billing <span class="text-blue-600">Center</span></h1>
@@ -19,7 +19,7 @@
                 <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm sticky top-8">
                     <h3 class="text-xl font-black text-slate-800 mb-6">Generate Invoice</h3>
                     
-                    <form action="/staff/billing/create" method="POST" id="billingForm" class="space-y-4">
+                    <form id="billingForm" class="space-y-4">
                         <div>
                             <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1">Select Appointment</label>
                             <select name="appointmentId" id="appointmentSelect" class="w-full bg-slate-50 border-none rounded-xl p-4 font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer" required>
@@ -51,7 +51,7 @@
                         </button>
 
                         <div class="pt-4 mt-6 border-t border-slate-50">
-                            <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl shadow-slate-200 hover:bg-blue-600 transform hover:-translate-y-1 transition-all uppercase tracking-widest text-[11px]">
+                            <button type="submit" id="submitBtn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl shadow-slate-200 hover:bg-blue-600 transform hover:-translate-y-1 transition-all uppercase tracking-widest text-[11px]">
                                 Finalize & Print Bill
                             </button>
                         </div>
@@ -84,14 +84,14 @@
                                     <% recentBills.forEach(bill => { %>
                                         <tr class="group hover:bg-blue-50/30 transition-all">
                                             <td class="px-8 py-6 font-mono font-bold text-blue-600 text-sm">
-                                                <%= bill.invoiceNumber || 'INV-' + bill._id.toString().slice(-6).toUpperCase() %>
+                                                <%= bill.invoiceNumber %>
                                             </td>
                                             <td class="px-8 py-6">
                                                 <p class="font-black text-slate-800"><%= bill.patient ? bill.patient.name : 'Unknown' %></p>
                                                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter italic">Date: <%= new Date(bill.createdAt).toLocaleDateString() %></p>
                                             </td>
                                             <td class="px-8 py-6 font-black text-slate-900">
-                                                ₹<%= bill.totalAmount ? bill.totalAmount.toLocaleString('en-IN') : '0' %>
+                                                ₹<%= bill.totalAmount.toLocaleString('en-IN') %>
                                             </td>
                                             <td class="px-8 py-6 text-right">
                                                 <button onclick="window.print()" class="text-[10px] font-black bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all uppercase shadow-sm">
@@ -120,18 +120,18 @@
 </div>
 
 <script>
-    // Update hidden Patient ID when appointment is selected
+    // Update the hidden patientId input
     document.getElementById('appointmentSelect').addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         const patientId = selectedOption.getAttribute('data-patient-id');
         document.getElementById('patientIdInput').value = patientId || '';
     });
 
-    // Dynamic Row Adder with ID tracking
+    // Add new service/cost rows dynamically
     function addItemRow() {
         const container = document.getElementById('billItems');
         const newRow = document.createElement('div');
-        newRow.className = 'flex gap-2 item-row animate-in slide-in-from-left duration-300';
+        newRow.className = 'flex gap-2 item-row mt-3';
         newRow.innerHTML = `
             <input type="text" name="services[]" placeholder="Service Name" class="flex-1 bg-slate-50 border-none rounded-xl p-3 text-sm font-bold focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all" required>
             <input type="number" name="costs[]" placeholder="₹" class="w-24 bg-slate-50 border-none rounded-xl p-3 text-sm font-bold focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all" required>
@@ -139,4 +139,44 @@
         `;
         container.appendChild(newRow);
     }
+
+    // Handle Form Submission using Fetch API
+    document.getElementById('billingForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerText;
+        
+        submitBtn.disabled = true;
+        submitBtn.innerText = "PROCESSING...";
+
+        const appointmentId = document.getElementById('appointmentSelect').value;
+        const patientId = document.getElementById('patientIdInput').value;
+        
+        const services = Array.from(document.querySelectorAll('input[name="services[]"]')).map(input => input.value);
+        const costs = Array.from(document.querySelectorAll('input[name="costs[]"]')).map(input => input.value);
+
+        try {
+            const response = await fetch('/staff/billing/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ appointmentId, patientId, services, costs })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("Invoice Created Successfully!");
+                window.location.reload(); 
+            } else {
+                alert("Error: " + result.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+            }
+        } catch (error) {
+            alert("Connection error. Please check your server.");
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
+        }
+    });
 </script>
